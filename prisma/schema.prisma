@@ -1,0 +1,196 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum NoteType {
+  kanji
+  word
+  paragraph
+}
+
+model Note {
+  id   Int      @id @default(autoincrement())
+  type NoteType
+
+  Topic   Topic? @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  topicId Int?
+
+  kanji     Kanji?
+  word      Word?
+  paragraph Paragraph?
+}
+
+model Kanji {
+  note   Note    @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  noteId Int     @id
+  link   String?
+  symbol String  @default("<empty symbol>")
+
+  translations KanjiTranslation[]
+  forms        KanjiForm[]
+  examples     KanjiExample[]
+}
+
+model KanjiTranslation {
+  id          Int    @id @default(autoincrement())
+  translation String @default("<empty translation>")
+
+  noteId Int
+  note   Kanji @relation(fields: [noteId], references: [noteId], onDelete: Cascade)
+}
+
+model KanjiForm {
+  id   Int    @id @default(autoincrement())
+  form String @default("<empty form>")
+
+  noteId Int
+  note   Kanji @relation(fields: [noteId], references: [noteId], onDelete: Cascade)
+}
+
+model KanjiExample {
+  id      Int    @id @default(autoincrement())
+  example String @default("<empty example>")
+
+  noteId Int
+  note   Kanji @relation(fields: [noteId], references: [noteId], onDelete: Cascade)
+}
+
+model Word {
+  note   Note @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  noteId Int  @id
+
+  katakana String  @default("<empty katakana>")
+  hirogana String  @default("<empty hirogana>")
+  romanji  String  @default("<empty romanji>")
+  kanji    String?
+
+  translation WordTranslation[]
+}
+
+model WordTranslation {
+  id          Int    @id @default(autoincrement())
+  translation String @default("<empty translation>")
+
+  noteId Int
+  tote   Word @relation(fields: [noteId], references: [noteId], onDelete: Cascade)
+}
+
+model Paragraph {
+  note   Note @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  noteId Int  @id
+
+  title String @default("<empty title>")
+  text  String @default("<empty text>")
+  link  String @default("<empty link>")
+}
+
+model Topic {
+  id          Int      @id @default(autoincrement())
+  title       String   @default("<empty title>")
+  description String   @db.VarChar(600)
+  createdAt   DateTime @default(now())
+
+  subjectId Int
+  subject   Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  notes       Note[]
+  questions   Question[]
+  examPresets ExamPreset[]
+}
+
+model Subject {
+  id     Int     @id @default(autoincrement())
+  title  String  @default("<empty title>")
+  topics Topic[]
+}
+
+enum QestionType {
+  choice
+  text
+}
+
+model Question {
+  id       Int         @id @default(autoincrement())
+  question String      @default("<empty question>")
+  active   Boolean     @default(true)
+  type     QestionType
+
+  topicId Int
+  topic   Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  qText   QText?
+  qOption QOption?
+  Answer  Answer[]
+}
+
+model QOption {
+  question   Question  @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId Int       @id
+  options    Options[]
+}
+
+model Options {
+  id         Int     @id @default(autoincrement())
+  text       String  @default("<empty option>")
+  correct    Boolean @default(false)
+  qOption    QOption @relation(fields: [questionId], references: [questionId], onDelete: Cascade)
+  questionId Int
+}
+
+enum AnswerType {
+  Text
+  Draw
+  Code
+}
+
+model QText {
+  question   Question   @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId Int        @id
+  answer     String     @default("<empty answer>")
+  answerType AnswerType @default(Text)
+}
+
+model ExamPreset {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  examResult ExamResult[]
+  topics     Topic[]
+}
+
+enum Correctness {
+  correct
+  false
+  partially
+}
+
+model Answer {
+  id      Int         @id @default(autoincrement())
+  correct Correctness @default(false)
+  value   String
+
+  question   Question @relation(fields: [questionId], references: [id])
+  questionId Int
+
+  examResult  ExamResult @relation(fields: [examResulId], references: [id])
+  examResulId Int
+}
+
+model ExamResult {
+  id   Int      @id @default(autoincrement())
+  mark Float    @default(0.0)
+  date DateTime @default(now())
+
+  examPreset   ExamPreset @relation(fields: [examPresetId], references: [id])
+  examPresetId Int
+
+  answers Answer[]
+}
