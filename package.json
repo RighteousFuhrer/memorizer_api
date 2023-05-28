@@ -1,12 +1,13 @@
 {
   "name": "memorizer_api",
   "version": "1.0.0",
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "bundleup": "webpack-cli",
-    "develop": "webpack-dev-server",
     "start": "node --watch public/bundle",
     "run db studio": "npx prisma studio"
   },

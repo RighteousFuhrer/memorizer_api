@@ -32,7 +32,7 @@ model Kanji {
   note   Note    @relation(fields: [noteId], references: [id], onDelete: Cascade)
   noteId Int     @id
   link   String?
-  symbol String  @default("<empty symbol>")
+  symbol String  
 
   translations KanjiTranslation[]
   forms        KanjiForm[]
@@ -41,7 +41,7 @@ model Kanji {
 
 model KanjiTranslation {
   id          Int    @id @default(autoincrement())
-  translation String @default("<empty translation>")
+  translation String 
 
   noteId Int
   note   Kanji @relation(fields: [noteId], references: [noteId], onDelete: Cascade)
@@ -49,7 +49,7 @@ model KanjiTranslation {
 
 model KanjiForm {
   id   Int    @id @default(autoincrement())
-  form String @default("<empty form>")
+  form String 
 
   noteId Int
   note   Kanji @relation(fields: [noteId], references: [noteId], onDelete: Cascade)
@@ -57,7 +57,7 @@ model KanjiForm {
 
 model KanjiExample {
   id      Int    @id @default(autoincrement())
-  example String @default("<empty example>")
+  example String 
 
   noteId Int
   note   Kanji @relation(fields: [noteId], references: [noteId], onDelete: Cascade)
@@ -67,9 +67,9 @@ model Word {
   note   Note @relation(fields: [noteId], references: [id], onDelete: Cascade)
   noteId Int  @id
 
-  katakana String  @default("<empty katakana>")
-  hirogana String  @default("<empty hirogana>")
-  romanji  String  @default("<empty romanji>")
+  katakana String  
+  hirogana String  
+  romanji  String  
   kanji    String?
 
   translation WordTranslation[]
@@ -77,24 +77,24 @@ model Word {
 
 model WordTranslation {
   id          Int    @id @default(autoincrement())
-  translation String @default("<empty translation>")
+  translation String 
 
   noteId Int
-  tote   Word @relation(fields: [noteId], references: [noteId], onDelete: Cascade)
+  note   Word @relation(fields: [noteId], references: [noteId], onDelete: Cascade)
 }
 
 model Paragraph {
   note   Note @relation(fields: [noteId], references: [id], onDelete: Cascade)
   noteId Int  @id
 
-  title String @default("<empty title>")
-  text  String @default("<empty text>")
-  link  String @default("<empty link>")
+  title String 
+  text  String 
+  link  String 
 }
 
 model Topic {
   id          Int      @id @default(autoincrement())
-  title       String   @default("<empty title>")
+  title       String   
   description String   @db.VarChar(600)
   createdAt   DateTime @default(now())
 
@@ -108,7 +108,7 @@ model Topic {
 
 model Subject {
   id     Int     @id @default(autoincrement())
-  title  String  @default("<empty title>")
+  title  String  
   topics Topic[]
 }
 
@@ -119,19 +119,19 @@ enum QestionType {
 
 model Question {
   id       Int         @id @default(autoincrement())
-  question String      @default("<empty question>")
+  question String      
   active   Boolean     @default(true)
   type     QestionType
 
   topicId Int
   topic   Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
 
-  qText   QText?
-  qOption QOption?
+  questionText   QuestionText?
+  questionOption QuestionOption?
   Answer  Answer[]
 }
 
-model QOption {
+model QuestionOption {
   question   Question  @relation(fields: [questionId], references: [id], onDelete: Cascade)
   questionId Int       @id
   options    Options[]
@@ -139,9 +139,9 @@ model QOption {
 
 model Options {
   id         Int     @id @default(autoincrement())
-  text       String  @default("<empty option>")
+  text       String  
   correct    Boolean @default(false)
-  qOption    QOption @relation(fields: [questionId], references: [questionId], onDelete: Cascade)
+  questionOption    QuestionOption @relation(fields: [questionId], references: [questionId], onDelete: Cascade)
   questionId Int
 }
 
@@ -151,10 +151,10 @@ enum AnswerType {
   Code
 }
 
-model QText {
+model QuestionText {
   question   Question   @relation(fields: [questionId], references: [id], onDelete: Cascade)
   questionId Int        @id
-  answer     String     @default("<empty answer>")
+  answer     String     
   answerType AnswerType @default(Text)
 }
 

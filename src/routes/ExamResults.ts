@@ -1,6 +1,6 @@
 import { ExamResult, PrismaClient } from "@prisma/client";
 import express from "express";
-import { ExamService } from "../services/ExamResultHandler";
+import { ExamService } from "../services/ExamService";
 import { resultFilter } from "../interfaces/SerachFilters";
 import { AnswerDto } from "../models/Answer";
 
@@ -38,6 +38,30 @@ const examResultRouter = (dbConnection: PrismaClient) => {
       const results = await examService.getAllFiltered(filter);
 
       res.status(200).send(results);
+    } catch (error) {
+      res.status(400).send({ message: error });
+    }
+  });
+
+  router.get("/:id", async (req, res) => {
+    const params = req.params;
+
+    try {
+      const result = await examService.getById(Number(params.id));
+
+      res.status(200).send(result);
+    } catch (error) {
+      res.status(400).send({ message: error });
+    }
+  });
+
+  router.delete("/:id", async (req, res) => {
+    const params = req.params;
+
+    try {
+      const result = await examService.delete(Number(params.id));
+
+      res.status(200).send(result);
     } catch (error) {
       res.status(400).send({ message: error });
     }

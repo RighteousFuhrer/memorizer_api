@@ -41,7 +41,6 @@ const topicRouter = (dbConnection: PrismaClient) => {
 
   router.post("/", async (req, res) => {
     const body = await req.body;
-    console.log(body);
     try {
       const topic = await dbConnection.topic.create({
         data: {
