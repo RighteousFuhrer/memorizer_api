@@ -1,4 +1,4 @@
-import { ExamPreset, Prisma, PrismaClient } from "@prisma/client";
+import { ExamPreset, Prisma, PrismaClient, Topic } from "@prisma/client";
 
 import prisma from "../src/lib/dbConnection";
 import { faker } from "@faker-js/faker";
@@ -21,7 +21,7 @@ async function main() {
     ],
   });
 
-  const topics = await prisma.topic.createMany({
+  const topics_res = await prisma.topic.createMany({
     data: [...new Array(faker.number.int({ min: 5, max: 14 }))].map((e) => {
       return {
         description: faker.string.alpha({ length: 16 }),
@@ -39,7 +39,7 @@ async function main() {
           topics: {
             connect: [...new Array(10)].map((e) => {
               return {
-                id: faker.number.int({ min: 1, max: topics.count - 1 }),
+                id: faker.number.int({ min: 1, max: topics_res.count - 1 }),
               };
             }),
           },
@@ -47,6 +47,74 @@ async function main() {
       })
     );
   });
+  const topics = await prisma.topic.findMany();
+
+  topics.forEach(async (topic) => {
+    [...new Array(faker.number.int({ min: 6, max: 20 }))].forEach(async (e) => {
+      const type = faker.number.int({ max: 3, min: 1 });
+      switch (type) {
+        case 1:
+          await prisma.question.create({
+            data: {
+              question: faker.string.alpha({ length: { min: 10, max: 25 } }),
+              type: "select",
+              topicId: topic.id,
+              questionOption: {
+                create: {
+                  options: {
+                    createMany: {
+                      data: [
+                        ...new Array(faker.number.int({ min: 2, max: 5 })),
+                      ].map((e2) => {
+                        return {
+                          text: faker.lorem.paragraph(1),
+                          correct: faker.number.int({ max: 1 }) ? true : false,
+                        };
+                      }),
+                    },
+                  },
+                },
+              },
+            },
+          });
+          break;
+        case 2:
+          await prisma.question.create({
+            data: {
+              question: faker.string.alpha({ length: { min: 10, max: 25 } }),
+              type: "image",
+              topicId: topic.id,
+              questionImage: {
+                create: {
+                  image: Buffer.from(
+                    faker.image.url({ width: 400, height: 400 })
+                  ),
+                },
+              },
+            },
+          });
+          break;
+        case 3:
+          await prisma.question.create({
+            data: {
+              question: faker.string.alpha({ length: { min: 10, max: 25 } }),
+              type: "text",
+              topicId: topic.id,
+              questionText: {
+                create: {
+                  text: faker.lorem.paragraph(1),
+                },
+              },
+            },
+          });
+          break;
+        default:
+          break;
+      }
+    });
+  });
+
+  
 }
 
 main()

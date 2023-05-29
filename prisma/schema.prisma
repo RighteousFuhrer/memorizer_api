@@ -32,7 +32,7 @@ model Kanji {
   note   Note    @relation(fields: [noteId], references: [id], onDelete: Cascade)
   noteId Int     @id
   link   String?
-  symbol String  
+  symbol String
 
   translations KanjiTranslation[]
   forms        KanjiForm[]
@@ -41,7 +41,7 @@ model Kanji {
 
 model KanjiTranslation {
   id          Int    @id @default(autoincrement())
-  translation String 
+  translation String
 
   noteId Int
   note   Kanji @relation(fields: [noteId], references: [noteId], onDelete: Cascade)
@@ -49,7 +49,7 @@ model KanjiTranslation {
 
 model KanjiForm {
   id   Int    @id @default(autoincrement())
-  form String 
+  form String
 
   noteId Int
   note   Kanji @relation(fields: [noteId], references: [noteId], onDelete: Cascade)
@@ -57,7 +57,7 @@ model KanjiForm {
 
 model KanjiExample {
   id      Int    @id @default(autoincrement())
-  example String 
+  example String
 
   noteId Int
   note   Kanji @relation(fields: [noteId], references: [noteId], onDelete: Cascade)
@@ -67,9 +67,9 @@ model Word {
   note   Note @relation(fields: [noteId], references: [id], onDelete: Cascade)
   noteId Int  @id
 
-  katakana String  
-  hirogana String  
-  romanji  String  
+  katakana String
+  hirogana String
+  romanji  String
   kanji    String?
 
   translation WordTranslation[]
@@ -77,7 +77,7 @@ model Word {
 
 model WordTranslation {
   id          Int    @id @default(autoincrement())
-  translation String 
+  translation String
 
   noteId Int
   note   Word @relation(fields: [noteId], references: [noteId], onDelete: Cascade)
@@ -87,14 +87,14 @@ model Paragraph {
   note   Note @relation(fields: [noteId], references: [id], onDelete: Cascade)
   noteId Int  @id
 
-  title String 
-  text  String 
-  link  String 
+  title String
+  text  String
+  link  String
 }
 
 model Topic {
   id          Int      @id @default(autoincrement())
-  title       String   
+  title       String
   description String   @db.VarChar(600)
   createdAt   DateTime @default(now())
 
@@ -108,18 +108,19 @@ model Topic {
 
 model Subject {
   id     Int     @id @default(autoincrement())
-  title  String  
+  title  String
   topics Topic[]
 }
 
 enum QestionType {
-  choice
+  select
   text
+  image
 }
 
 model Question {
   id       Int         @id @default(autoincrement())
-  question String      
+  question String
   active   Boolean     @default(true)
   type     QestionType
 
@@ -127,35 +128,43 @@ model Question {
   topic   Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
 
   questionText   QuestionText?
-  questionOption QuestionOption?
-  Answer  Answer[]
+  questionOption QuestionSelect?
+  questionImage  QuestionImage?
+  Answer         Answer[]
 }
 
-model QuestionOption {
-  question   Question  @relation(fields: [questionId], references: [id], onDelete: Cascade)
-  questionId Int       @id
-  options    Options[]
+model QuestionSelect {
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId Int      @id
+  options    Option[]
 }
 
-model Options {
-  id         Int     @id @default(autoincrement())
-  text       String  
-  correct    Boolean @default(false)
-  questionOption    QuestionOption @relation(fields: [questionId], references: [questionId], onDelete: Cascade)
-  questionId Int
+model Option {
+  id             Int            @id @default(autoincrement())
+  text           String
+  correct        Boolean        @default(false)
+  questionOption QuestionSelect @relation(fields: [questionId], references: [questionId], onDelete: Cascade)
+  questionId     Int
+
+  selected OptionSelected[]
 }
 
 enum AnswerType {
   Text
-  Draw
   Code
 }
 
 model QuestionText {
   question   Question   @relation(fields: [questionId], references: [id], onDelete: Cascade)
   questionId Int        @id
-  answer     String     
+  text       String
   answerType AnswerType @default(Text)
+}
+
+model QuestionImage {
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId Int      @id
+  image      Bytes
 }
 
 model ExamPreset {
@@ -175,13 +184,47 @@ enum Correctness {
 model Answer {
   id      Int         @id @default(autoincrement())
   correct Correctness @default(false)
-  value   String
 
   question   Question @relation(fields: [questionId], references: [id])
   questionId Int
 
-  examResult  ExamResult @relation(fields: [examResulId], references: [id])
-  examResulId Int
+  examResult   ExamResult @relation(fields: [examResultId], references: [id], onDelete: Cascade)
+  examResultId Int
+
+  text     AnswerText?
+  image    AnswerImage?
+  selected AnswerSelect?
+}
+
+model AnswerText {
+  answerId Int    @id
+  answer   Answer @relation(fields: [answerId], references: [id], onDelete: Cascade)
+
+  text String
+}
+
+model AnswerImage {
+  answerId Int    @id
+  answer   Answer @relation(fields: [answerId], references: [id], onDelete: Cascade)
+
+  image Bytes
+}
+
+model AnswerSelect {
+  answerId Int    @id
+  answer   Answer @relation(fields: [answerId], references: [id], onDelete: Cascade)
+
+  options OptionSelected[]
+}
+
+model OptionSelected {
+  id Int @id @default(autoincrement())
+
+  answerId Int
+  answer   AnswerSelect @relation(fields: [answerId], references: [answerId], onDelete: Cascade)
+
+  optionId Int
+  option   Option @relation(fields: [optionId], references: [id])
 }
 
 model ExamResult {

@@ -3,20 +3,17 @@ import express from "express";
 import { ExamService } from "../services/ExamService";
 import { resultFilter } from "../interfaces/SerachFilters";
 import { AnswerDto } from "../models/Answer";
+import { AnswerService } from "../services/AnswerService";
 
 const examResultRouter = (dbConnection: PrismaClient) => {
   const router = express.Router();
-  const examService = new ExamService(dbConnection);
+  const answerService = new AnswerService(dbConnection);
+  const examService = new ExamService(dbConnection, answerService);
 
   router.post("/", async (req, res) => {
-    const params: { answers: AnswerDto[]; presetId: number } = req.body;
-
+    const { answers, presetId } = req.body;
     try {
-      const results = await examService.generateResult(
-        params.answers,
-        0,
-        params.presetId
-      );
+      const results = await examService.generateResult(answers, 0, presetId);
 
       res.status(200).send(results);
     } catch (error) {
