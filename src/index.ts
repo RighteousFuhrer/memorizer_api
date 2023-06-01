@@ -1,7 +1,11 @@
 import { Request, Response, Express } from "express";
+import {initTRPC} from "@trpc/server"
 import bodyParser from "body-parser";
 const app: Express = require("express")();
-require("dotenv").config();
+const cors = require("cors");
+const t = initTRPC.create();
+const detenv = require("dotenv").config();
+
 
 import prisma from "./lib/dbConnection";
 import topicRouter from "./routes/Topics";
@@ -13,6 +17,7 @@ import examPresetRouter from "./routes/ExamPresets";
 import answerRouter from "./routes/Answers";
 
 app.use(bodyParser.json());
+app.use(cors());
 
 app.use("/topics", topicRouter(prisma));
 app.use("/notes", noteRouter(prisma));

@@ -122,6 +122,22 @@ export class NoteService {
     try {
       const notes = await this.prismaClient.note.findMany({
         where: { topicId },
+        include : {
+          kanji : {
+            include : {
+              examples: true,
+              forms : true,
+              translations : true
+            }
+          },
+          paragraph : true,
+          word : {
+            include : {
+              note : true,
+              translation : true
+            }
+          }
+        }
       });
       return notes;
     } catch (error) {
