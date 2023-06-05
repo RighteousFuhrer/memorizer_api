@@ -20,7 +20,6 @@ const noteRouter = (dbConnection: PrismaClient) => {
 
   router.get("/:id", async (req, res) => {
     const { id } = req.params;
-    console.log(id);
     try {
       const note = await noteService.getAllByTopicId(Number(id));
 

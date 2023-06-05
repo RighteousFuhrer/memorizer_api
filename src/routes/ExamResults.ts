@@ -23,8 +23,6 @@ const examResultRouter = (dbConnection: PrismaClient) => {
 
   router.get("/", async (req, res) => {
     const params = req.query;
-    //result filter
-    console.log(params);
     const filter: resultFilter = {
       order: "asc",
       sort: "date",
